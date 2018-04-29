@@ -13,25 +13,27 @@ class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 
   final String title;
-
+  var _files = <FileSystemEntity>[];
   @override
   _MyHomePageState createState() => new _MyHomePageState();
 
   Future<List<FileSystemEntity>> _dirContents() async {
+    _files.clear();
     Directory directory = await getApplicationDocumentsDirectory();
-    var files = <FileSystemEntity>[];
     var completer = new Completer();
     var lister = directory.list(recursive: false);
-    lister.listen((file) => files.add(file),
-        // should also register onError
-        onDone: () => completer.complete(files));
-    return files;
+    lister.listen((file) => _files.add(file),
+        onError: (e) => print(e),
+        onDone: () => completer.complete(_files));
+        print("Total Files ${_files.length}");
+    return _files;
   }
 
   List<InvoiceTile> _buildInvoiceList() {
     var tileList = new List<InvoiceTile>();
     _dirContents().then((list) {
-      list.forEach((file) => {tileList.add(new InvoiceTile(file)): tileList});
+      list.forEach((file) => {
+        tileList.add(new InvoiceTile(file)): tileList});
     });
     return tileList;
   }
@@ -48,9 +50,16 @@ class _MyHomePageState extends State<MyHomePage> {
         padding: new EdgeInsets.all(8.0),
         child: new Column(
           crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             new Expanded(
-              child: viewProvider(),
+              child: new RefreshIndicator(
+                child: viewProvider(),
+                onRefresh: (() {
+                  print('Refreshed');
+                  setState(() {});
+                }),
+              ),
             )
           ],
         ),
@@ -58,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: new FloatingActionButton(
         onPressed: () {
           Navigator.push(context,
-              new MaterialPageRoute(builder: (context) => new NewInvoice()));
+              new MaterialPageRoute(builder: (context) => new NewInvoice(widget._files.length)));
         },
         child: new Icon(Icons.add),
       ),
@@ -68,13 +77,19 @@ class _MyHomePageState extends State<MyHomePage> {
   viewProvider() {
     if (widget._buildInvoiceList().isNotEmpty) {
       return new ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
         children: widget._buildInvoiceList(),
       );
     } else {
-      return new Text(
-        'No Invoice Found',
-        style: TextStyle(
-            color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16.0),
+      return new Container(
+        padding: const EdgeInsets.all(8.0),
+        alignment: Alignment.center,
+        child: new Text(
+          'No Invoice Found',
+          style: TextStyle(
+              color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 22.0),
+          textAlign: TextAlign.center,
+        ),
       );
     }
   }
