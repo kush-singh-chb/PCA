@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 
 import 'InvoiceTile.dart';
 import 'NewInvoice.dart';
@@ -21,11 +22,12 @@ class MyHomePage extends StatefulWidget {
   Future<List<FileSystemEntity>> _dirContents() async {
     _files.clear();
     Directory directory = await getApplicationDocumentsDirectory();
-    var lister = directory.list(recursive: false);
-    lister.listen((file) => _files.add(file),
-        onError: (e) => print(e),
-        onDone: () => _completer.complete(_files));
-        print("Total Files ${_files.length}");
+    var lister = directory.listSync(recursive: false);
+    lister.forEach((FileSystemEntity file) => {
+          (basename(file.path).contains("invoice")) ? _files.add(file) : _files:
+              null
+        });
+    print("Total Files ${_files.length}");
     return _files;
   }
 
@@ -33,8 +35,11 @@ class MyHomePage extends StatefulWidget {
     var tileList = new List<InvoiceTile>();
     _dirContents().then((list) {
       list.forEach((file) => {
-        tileList.add(new InvoiceTile(file)): tileList});
+            tileList.add(new InvoiceTile(file)): tileList,
+            print("File Name ${basename(file.path)}"): String,
+          });
     });
+    print("Tile List Size ${tileList.length}");
     return tileList;
   }
 }
@@ -65,16 +70,14 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: new FloatingActionButton(
+        child:new Icon(Icons.add),
         onPressed: () {
-          if(widget._completer.isCompleted){
-            Navigator.push(context,
-              new MaterialPageRoute(builder: (context) => new NewInvoice(widget._files.length)));
-          }else{
-            Scaffold.of(context).showSnackBar(new SnackBar(content :new Text('Please Wait Invoices Loading....')));
-          }
-        },
-        child: new Icon(Icons.add),
-      ),
+        print("Files Found ${widget._files.length}");
+          Navigator.push(
+              context,
+              new MaterialPageRoute(
+                  builder: (context) => new NewInvoice(widget._files.length + 1)));
+      }),
     );
   }
 
@@ -97,4 +100,8 @@ class _MyHomePageState extends State<MyHomePage> {
       );
     }
   }
+}
+
+void showSnackBar(BuildContext context, String s) {
+  Scaffold.of(context).showSnackBar(new SnackBar(content: new Text(s)));
 }
