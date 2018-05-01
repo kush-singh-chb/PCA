@@ -14,17 +14,17 @@ class MyHomePage extends StatefulWidget {
 
   final String title;
   var _files = <FileSystemEntity>[];
+  var _completer = new Completer();
   @override
   _MyHomePageState createState() => new _MyHomePageState();
 
   Future<List<FileSystemEntity>> _dirContents() async {
     _files.clear();
     Directory directory = await getApplicationDocumentsDirectory();
-    var completer = new Completer();
     var lister = directory.list(recursive: false);
     lister.listen((file) => _files.add(file),
         onError: (e) => print(e),
-        onDone: () => completer.complete(_files));
+        onDone: () => _completer.complete(_files));
         print("Total Files ${_files.length}");
     return _files;
   }
@@ -66,8 +66,12 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: new FloatingActionButton(
         onPressed: () {
-          Navigator.push(context,
+          if(widget._completer.isCompleted){
+            Navigator.push(context,
               new MaterialPageRoute(builder: (context) => new NewInvoice(widget._files.length)));
+          }else{
+            Scaffold.of(context).showSnackBar(new SnackBar(content :new Text('Please Wait Invoices Loading....')));
+          }
         },
         child: new Icon(Icons.add),
       ),
