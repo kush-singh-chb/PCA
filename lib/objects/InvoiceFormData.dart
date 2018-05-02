@@ -4,6 +4,9 @@ import 'ShipToParty.dart';
 import 'Total.dart';
 
 class InvoiceFormData{
+
+  var transportModes = ['Road','Railway','Air','Ship'];
+
   String invoiceNumber;
   String invoiceDate;
   bool sameAsAbove = true;

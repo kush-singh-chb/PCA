@@ -58,6 +58,7 @@ class NewInvoiceState extends State<NewInvoice> {
                     labelText: "Invoice Id",
                     labelStyle: new TextStyle(color: Colors.black),
                     fillColor: Colors.white,
+                    icon: Icon(Icons.assessment),
                     border: new UnderlineInputBorder(
                         borderSide: new BorderSide(color: Colors.white)),
                     contentPadding: new EdgeInsets.all(2.0)),
@@ -73,6 +74,7 @@ class NewInvoiceState extends State<NewInvoice> {
                 controller: _invoiceDateController,
                 decoration: new InputDecoration(
                     labelText: "Invoice Date",
+                    icon: Icon(Icons.date_range),
                     labelStyle: new TextStyle(color: Colors.black),
                     fillColor: Colors.white,
                     border: new UnderlineInputBorder(
@@ -117,10 +119,29 @@ class NewInvoiceState extends State<NewInvoice> {
                     labelText: "Supply Date",
                     labelStyle: new TextStyle(color: Colors.black),
                     fillColor: Colors.white,
+                    icon: Icon(Icons.date_range),
                     border: new UnderlineInputBorder(
                         borderSide: new BorderSide(color: Colors.white)),
                     contentPadding: new EdgeInsets.all(2.0)),
                 onChanged: (value) => _formData.supplyDate = value,
+              ),
+            ),
+            new Padding(
+              padding: const EdgeInsets.fromLTRB(12.0, 4.0, 12.0, 4.0),
+              child: new DropdownButton<String>(
+                hint: new Text("Mode of Transport"),
+                value: _formData.transportMode,
+                items: _formData.transportModes.map((String value) {
+                  return new DropdownMenuItem<String>(
+                    value: value,
+                    child: new Text(value),
+                  );
+                }).toList(),
+                onChanged: (value) => {
+                  this.setState((){
+                    _formData.transportMode = value;
+                  }) : String
+                } ,
               ),
             )
           ],
