@@ -1,22 +1,18 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../objects/InvoiceFormData.dart';
+
+
+
 
 class NewInvoice extends StatefulWidget {
   int _invoiceNumber;
   NewInvoice(this._invoiceNumber);
-  DateTime _date = new DateTime.now();
-
-  Future<Null> _selectedDate(BuildContext context) async{
-    final DateTime picked = await showDatePicker(
-      context: context,
-      initialDate: _date,
-      firstDate: new DateTime(2010),
-    );
-    
-  }
+  
+ 
 
   @override
   NewInvoiceState createState() {
@@ -26,10 +22,31 @@ class NewInvoice extends StatefulWidget {
 
 class NewInvoiceState extends State<NewInvoice> {
   var _formData = new InvoiceFormData();
-  TextEditingController _invoiceDateController, _supplyDateController;
+  TextEditingController _invoiceIdController,
+      _invoiceDateController,
+      _supplyDateController;
+      DateTime _date = new DateTime.now();
+      var formatter = new DateFormat('dd-MM-yy');
+
+
+       Future<Null> _selectedDate(BuildContext context) async {
+    final DateTime picked = await showDatePicker(
+      context: context,
+      initialDate: _date,
+      firstDate: new DateTime(2010),
+      lastDate: new DateTime(2050)
+    );
+    this.setState((){
+      _formData.invoiceDate = formatter.format(picked);
+      _invoiceDateController.text = formatter.format(picked);
+      checkAndUpdateValue(_formData.invoiceDate);
+    });
+  }
 
   @override
   void initState() {
+    _invoiceIdController =
+        new TextEditingController(text: "${widget._invoiceNumber}/18-19");
     _invoiceDateController =
         new TextEditingController(text: _formData.invoiceDate);
     _supplyDateController =
@@ -53,7 +70,8 @@ class NewInvoiceState extends State<NewInvoice> {
           children: <Widget>[
             new Padding(
               padding: const EdgeInsets.fromLTRB(12.0, 4.0, 12.0, 4.0),
-              child: new TextFormField(
+              child: new TextField(
+                controller: _invoiceIdController,
                 decoration: new InputDecoration(
                     labelText: "Invoice Id",
                     labelStyle: new TextStyle(color: Colors.black),
@@ -62,30 +80,34 @@ class NewInvoiceState extends State<NewInvoice> {
                     border: new UnderlineInputBorder(
                         borderSide: new BorderSide(color: Colors.white)),
                     contentPadding: new EdgeInsets.all(2.0)),
-                initialValue: '${widget._invoiceNumber}/18-19',
-                onFieldSubmitted: ((value) {
+                onChanged: ((value) {
                   _formData.invoiceNumber = value;
                 }),
               ),
             ),
-            new Padding(
+            new FlatButton(
               padding: const EdgeInsets.fromLTRB(12.0, 4.0, 12.0, 4.0),
-              child: new TextField(
-                controller: _invoiceDateController,
-                decoration: new InputDecoration(
-                    labelText: "Invoice Date",
-                    icon: Icon(Icons.date_range),
-                    labelStyle: new TextStyle(color: Colors.black),
-                    fillColor: Colors.white,
-                    border: new UnderlineInputBorder(
-                        borderSide: new BorderSide(color: Colors.white)),
-                    contentPadding: new EdgeInsets.all(2.0)),
-                onChanged: (value) => {
-                      _formData.invoiceDate = value: String,
-                      checkAndUpdateValue(value): String,
-                    },
+              color: Colors.transparent,
+              onPressed: () => {
+                _selectedDate(context)
+              : String},
+                child: new TextField(
+                  enabled: false,
+                  controller: _invoiceDateController,
+                  decoration: new InputDecoration(
+                      labelText: "Invoice Date",
+                      icon: Icon(Icons.date_range),
+                      labelStyle: new TextStyle(color: Colors.black),
+                      fillColor: Colors.white,
+                      border: new UnderlineInputBorder(
+                          borderSide: new BorderSide(color: Colors.white)),
+                      contentPadding: new EdgeInsets.all(2.0)),
+                 /*  onChanged: (value) => {
+                        _formData.invoiceDate = value: String,
+                        checkAndUpdateValue(value): String,
+                      }, */
+                ),
               ),
-            ),
             new Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -138,10 +160,10 @@ class NewInvoiceState extends State<NewInvoice> {
                   );
                 }).toList(),
                 onChanged: (value) => {
-                  this.setState((){
-                    _formData.transportMode = value;
-                  }) : String
-                } ,
+                      this.setState(() {
+                        _formData.transportMode = value;
+                      }): String
+                    },
               ),
             )
           ],
